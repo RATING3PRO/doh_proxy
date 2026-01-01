@@ -4,11 +4,11 @@ A privacy-focused, multi-upstream DNS over HTTPS (DoH) proxy built with Next.js 
 
 ## Features
 
--  **Edge Powered**: Runs on Cloudflare's global network for sub-millisecond latency.
--  **Multi-Upstream**: Support for Cloudflare, Google, Quad9, AliDNS, DNSPod, and Custom upstream.
--  **DNS Tester**: Built-in beautiful UI to test DNS resolution across different providers.
--  **Privacy First**: No logs, stateless proxying.
--  **Modern UI**: Built with Tailwind CSS and Lucide Icons.
+- 🚀 **Edge Powered**: Runs on Cloudflare's global network for sub-millisecond latency.
+- 🛡️ **Multi-Upstream**: Support for Cloudflare, Google, AliDNS, DNSPod, and Custom upstream.
+- 🔍 **DNS Tester**: Built-in beautiful UI to test DNS resolution across different providers.
+- 🔒 **Privacy First**: No logs, stateless proxying.
+- 💅 **Modern UI**: Built with Tailwind CSS and Lucide Icons.
 
 ## Deploy to Cloudflare Pages
 
@@ -22,7 +22,8 @@ A privacy-focused, multi-upstream DNS over HTTPS (DoH) proxy built with Next.js 
    - **Build Command**: `npx @cloudflare/next-on-pages@1`
    - **Build Output Directory**: `.vercel/output/static`
    - **Node.js Version**: `20.x` or higher.
-5. (Optional) Set Environment Variables if using Custom provider.
+5. (Important) Ensure **Compatibility flags** includes `nodejs_compat`. 
+   > The project includes a `wrangler.toml` which should automatically configure this, but if deployment fails, check **Settings** > **Build & deployments** > **Compatibility flags** in Cloudflare Dashboard.
 
 ### Option 2: CLI Deploy
 
@@ -59,10 +60,10 @@ Configure your DoH client (browser, router, or OS) with the following endpoints:
 
 - **Cloudflare**: `https://<your-domain>/api/doh/cloudflare`
 - **Google**: `https://<your-domain>/api/doh/google`
-- **Quad9**: `https://<your-domain>/api/doh/quad9`
 - **AliDNS**: `https://<your-domain>/api/doh/alidns`
 - **DNSPod**: `https://<your-domain>/api/doh/dnspod`
 - **Custom**: `https://<your-domain>/api/doh/custom` (Requires `CUSTOM_DOH_URL`)
+- **Manual**: `https://<your-domain>/api/doh/manual?upstream=<url>`
 
 ## Development
 
@@ -76,4 +77,4 @@ CUSTOM_DOH_URL=https://1.1.1.1/dns-query npm run dev
 
 ## License
 
-
+MIT

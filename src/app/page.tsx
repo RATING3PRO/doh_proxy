@@ -31,7 +31,7 @@ export default function Home() {
         <FeatureCard 
           icon={<Globe className="w-6 h-6 text-indigo-600" />}
           title="Multi-Provider"
-          description="Switch between Cloudflare, Google, Quad9, and more instantly."
+          description="Switch between Cloudflare, Google, AliDNS, DNSPod, and more instantly."
         />
         <FeatureCard 
           icon={<Zap className="w-6 h-6 text-amber-500" />}
@@ -67,7 +67,9 @@ export default function Home() {
       </div>
 
       <footer className="mt-20 text-center text-slate-500 text-sm">
-        <p>© {new Date().getFullYear()} DoH Proxy. Open Source.</p>
+        <p>
+          © {new Date().getFullYear()} <a href="https://github.com/RATING3PRO/doh_proxy" target="_blank" rel="noopener noreferrer" className="hover:text-blue-600 transition-colors">DoH Proxy</a>. Open Source.
+        </p>
       </footer>
     </main>
   );

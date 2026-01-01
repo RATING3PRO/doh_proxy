@@ -30,6 +30,7 @@ export default function DnsTester() {
   const [domain, setDomain] = useState('google.com');
   const [type, setType] = useState('A');
   const [providerId, setProviderId] = useState(DOH_PROVIDERS[0].id);
+  const [manualUrl, setManualUrl] = useState('');
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<DnsResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -42,8 +43,18 @@ export default function DnsTester() {
     setResult(null);
     setError(null);
 
+    let apiUrl = `/api/doh/${providerId}?name=${domain}&type=${type}`;
+    if (providerId === 'manual') {
+      if (!manualUrl) {
+        setError('Please enter a valid DoH URL');
+        setLoading(false);
+        return;
+      }
+      apiUrl += `&upstream=${encodeURIComponent(manualUrl)}`;
+    }
+
     try {
-      const res = await fetch(`/api/doh/${providerId}?name=${domain}&type=${type}`, {
+      const res = await fetch(apiUrl, {
         headers: {
           'Accept': 'application/dns-json',
         },
@@ -118,6 +129,23 @@ export default function DnsTester() {
             ))}
           </div>
         </div>
+
+        {providerId === 'manual' && (
+          <div className="space-y-2 animate-in fade-in slide-in-from-top-2">
+            <label className="text-sm font-medium text-slate-600">Custom DoH URL</label>
+            <input
+              type="url"
+              value={manualUrl}
+              onChange={(e) => setManualUrl(e.target.value)}
+              className="w-full px-4 py-2 rounded-lg border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+              placeholder="https://example.com/dns-query"
+              required
+            />
+            <p className="text-xs text-slate-500">
+              Note: The server must support CORS or be accessible by the proxy.
+            </p>
+          </div>
+        )}
 
         <button
           type="submit"

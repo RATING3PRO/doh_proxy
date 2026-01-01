@@ -15,19 +15,13 @@ export const DOH_PROVIDERS: DoHProvider[] = [
   {
     id: 'google',
     name: 'Google',
-    endpoint: 'https://dns.google/dns-query',
+    endpoint: 'https://dns.google/resolve',
     description: 'Google Public DNS (8.8.8.8)',
-  },
-  {
-    id: 'quad9',
-    name: 'Quad9',
-    endpoint: 'https://dns9.quad9.net:5053/dns-query',
-    description: 'Security-focused DNS (9.9.9.9)',
   },
   {
     id: 'alidns',
     name: 'AliDNS',
-    endpoint: 'https://dns.alidns.com/dns-query',
+    endpoint: 'https://dns.alidns.com/resolve',
     description: 'Alibaba Cloud DNS (223.5.5.5)',
   },
   {
@@ -38,9 +32,15 @@ export const DOH_PROVIDERS: DoHProvider[] = [
   },
   {
     id: 'custom',
-    name: 'Custom',
+    name: 'Custom (Env)',
     endpoint: 'Variable',
-    description: 'Custom DoH via CUSTOM_DOH_URL env',
+    description: 'Via CUSTOM_DOH_URL env',
+  },
+  {
+    id: 'manual',
+    name: 'Manual Input',
+    endpoint: 'Manual',
+    description: 'Enter any DoH URL',
   },
 ];
 

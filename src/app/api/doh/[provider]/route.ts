@@ -30,6 +30,24 @@ async function handleDoH(request: NextRequest, providerId: string) {
       );
     }
     endpoint = envUrl;
+  } else if (providerId === 'manual') {
+    const upstreamParam = request.nextUrl.searchParams.get('upstream');
+    if (!upstreamParam) {
+      return NextResponse.json(
+        { error: 'Missing "upstream" query parameter for manual provider' }, 
+        { status: 400 }
+      );
+    }
+    try {
+      // Validate URL
+      new URL(upstreamParam);
+      endpoint = upstreamParam;
+    } catch {
+      return NextResponse.json(
+        { error: 'Invalid "upstream" URL provided' }, 
+        { status: 400 }
+      );
+    }
   }
 
   try {
@@ -40,6 +58,8 @@ async function handleDoH(request: NextRequest, providerId: string) {
     // For GET requests, forward all search parameters (dns=...)
     if (request.method === 'GET') {
       request.nextUrl.searchParams.forEach((value, key) => {
+        // Skip 'upstream' param for manual provider
+        if (key === 'upstream' && providerId === 'manual') return;
         url.searchParams.append(key, value);
       });
     }
