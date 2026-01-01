@@ -77,4 +77,4 @@ CUSTOM_DOH_URL=https://1.1.1.1/dns-query npm run dev
 
 ## License
 
-MIT
+AGPL-3.0
