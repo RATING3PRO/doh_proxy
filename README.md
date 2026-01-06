@@ -4,11 +4,11 @@ A privacy-focused, multi-upstream DNS over HTTPS (DoH) proxy built with Next.js 
 
 ## Features
 
-- 🚀 **Edge Powered**: Runs on Cloudflare's global network for sub-millisecond latency.
-- 🛡️ **Multi-Upstream**: Support for Cloudflare, Google, AliDNS, DNSPod, and Custom upstream.
-- 🔍 **DNS Tester**: Built-in beautiful UI to test DNS resolution across different providers.
-- 🔒 **Privacy First**: No logs, stateless proxying.
-- 💅 **Modern UI**: Built with Tailwind CSS and Lucide Icons.
+-  **Edge Powered**: Runs on Cloudflare's global network for sub-millisecond latency.
+-  **Multi-Upstream**: Support for Cloudflare, Google, AliDNS, DNSPod, and Custom upstream.
+-  **DNS Tester**: Built-in beautiful UI to test DNS resolution across different providers.
+-  **Privacy First**: No logs, stateless proxying.
+-  **Modern UI**: Built with Tailwind CSS and Lucide Icons.
 
 ## Deploy to Cloudflare Pages
 
