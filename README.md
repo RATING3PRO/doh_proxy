@@ -10,6 +10,21 @@ A privacy-focused, multi-upstream DNS over HTTPS (DoH) proxy built with **Next.j
 -  **Privacy First**: No logs, stateless proxying.
 -  **Modern UI**: Built with Tailwind CSS and Lucide Icons.
 
+###  Enterprise-Grade Security & Reliability (New in v1.1)
+
+- **Strict Caching Policy**: Enforces `Cache-Control: no-store` to prevent middlebox/CDN caching of sensitive DNS data.
+- **Request Lifecycle Management**: 
+  - 2500ms upstream timeout protection.
+  - 3000ms global budget to prevent edge function hangs.
+- **Enhanced Input Validation**: 
+  - Strict domain validation (RFC-compliant regex, length checks).
+  - Query string size limits to prevent DoS.
+- **Platform Agnostic**: 
+  - Normalized Headers (`Accept: application/dns-json`, `User-Agent`).
+  - Abstracted Client IP resolution (supports `x-forwarded-for`, `cf-connecting-ip`).
+- **Observability**: Structured JSON logging for errors and debug mode.
+- **Health Checks**: Native `HEAD` method support (returns 204) for load balancers.
+
 ## Deployment
 
 ### Option 1: Vercel (Recommended)
@@ -56,6 +71,7 @@ Since this is a standard Next.js 16 application, it can be deployed on various p
 | Variable Name | Description | Required |
 | ------------- | ----------- | -------- |
 | `CUSTOM_DOH_URL` | The upstream DoH URL for the 'Custom' provider (e.g., `https://1.1.1.1/dns-query`) | No (Only for Custom provider) |
+| `DEBUG_LOG` | Set to `true` to enable verbose JSON logging for all requests. | No |
 
 ## Usage
 
@@ -71,6 +87,9 @@ Configure your DoH client (browser, router, or OS) with the following endpoints:
 - **DNSPod**: `/api/doh/dnspod`
 - **Custom**: `/api/doh/custom` (Requires `CUSTOM_DOH_URL`)
 - **Manual**: `/api/doh/manual?upstream=<url>`
+
+### Health Check
+Send a `HEAD` request to any endpoint to verify service availability (returns 204 No Content).
 
 ## Development
 
