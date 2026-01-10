@@ -1,117 +1,203 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getProvider } from '@/lib/providers';
 
-export const runtime = 'edge'; // Enforce Edge Runtime for Cloudflare Pages
+export const runtime = 'edge';
 
-/**
- * Handles DoH requests for a specific provider.
- * Supports both GET (DNS wireformat via base64) and POST (DNS wireformat via body).
- */
+// --- Constants & Config ---
+
+const REQUEST_TIMEOUT_MS = 2500; // Upstream timeout (1500ms - 2500ms)
+const MAX_QUERY_STRING_LENGTH = 1024;
+const ALLOWED_DOMAIN_REGEX = /^[a-zA-Z0-9.-]+$/;
+
+// --- Helpers ---
+
+function getClientIP(req: NextRequest): string {
+  // Abstracted IP retrieval - prefer standard headers but don't rely on it for auth
+  return (
+    req.headers.get('x-forwarded-for')?.split(',')[0] ||
+    req.headers.get('cf-connecting-ip') ||
+    'unknown'
+  );
+}
+
+function isValidDomain(domain: string | null): boolean {
+  if (!domain) return true; // If no domain param, skip (e.g. raw DNS message)
+  if (domain.length > 253) return false;
+  return ALLOWED_DOMAIN_REGEX.test(domain);
+}
+
+interface LogEntry {
+  timestamp: string;
+  clientIp: string;
+  provider: string;
+  durationMs: number;
+  status: number;
+  upstreamUrl?: string;
+  error?: string;
+  method: string;
+}
+
+function logRequest(entry: LogEntry) {
+  // Only log if debug enabled or it's an error? 
+  // User said "Debug info must be explicitly enabled". 
+  // "Minimum config: Duration, Success/Fail, Upstream Name, Status Code" - this implies basic logs might be always on or structured.
+  // I'll stick to console.log which is standard for edge runtimes, but wrapped.
+  if (process.env.DEBUG_LOG === 'true' || entry.status >= 400) {
+    console.log(JSON.stringify(entry));
+  }
+}
+
+// --- Main Handler ---
+
 async function handleDoH(request: NextRequest, providerId: string) {
-  const provider = getProvider(providerId);
-
-  // 1. Validate Provider
-  if (!provider) {
-    return NextResponse.json(
-      { error: `Provider '${providerId}' not found` }, 
-      { status: 404 }
-    );
-  }
-
-  // 2. Determine Upstream Endpoint
-  let endpoint = provider.endpoint;
+  const startTime = Date.now();
+  let upstreamEndpoint = '';
+  let responseStatus = 500;
   
-  if (providerId === 'custom') {
-    const envUrl = process.env.CUSTOM_DOH_URL;
-    if (!envUrl) {
-      return NextResponse.json(
-        { error: 'Server configuration error: CUSTOM_DOH_URL not set' }, 
-        { status: 500 }
-      );
-    }
-    endpoint = envUrl;
-  } else if (providerId === 'manual') {
-    const upstreamParam = request.nextUrl.searchParams.get('upstream');
-    if (!upstreamParam) {
-      return NextResponse.json(
-        { error: 'Missing "upstream" query parameter for manual provider' }, 
-        { status: 400 }
-      );
-    }
-    try {
-      // Validate URL
-      new URL(upstreamParam);
-      endpoint = upstreamParam;
-    } catch {
-      return NextResponse.json(
-        { error: 'Invalid "upstream" URL provided' }, 
-        { status: 400 }
-      );
-    }
-  }
-
   try {
-    const url = new URL(endpoint);
+    // 1. Input Validation
+    const url = new URL(request.url);
     
+    // Validate Query String Length
+    if (url.search.length > MAX_QUERY_STRING_LENGTH) {
+      responseStatus = 414;
+      return new NextResponse('Query string too long', { status: 414 });
+    }
+
+    // Validate Domain Name (if present in 'name' param for JSON API)
+    const nameParam = url.searchParams.get('name');
+    if (nameParam && !isValidDomain(nameParam)) {
+       responseStatus = 400;
+       return new NextResponse('Invalid domain format', { status: 400 });
+    }
+
+    // 2. Provider Logic
+    const provider = getProvider(providerId);
+    if (!provider) {
+      responseStatus = 404;
+      return new NextResponse(`Provider '${providerId}' not found`, { status: 404 });
+    }
+
+    upstreamEndpoint = provider.endpoint;
+
+    // Handle Custom/Manual Overrides
+    if (providerId === 'custom') {
+      const envUrl = process.env.CUSTOM_DOH_URL;
+      if (!envUrl) {
+        responseStatus = 500;
+        return new NextResponse('Configuration Error: CUSTOM_DOH_URL missing', { status: 500 });
+      }
+      upstreamEndpoint = envUrl;
+    } else if (providerId === 'manual') {
+      const manualUrl = url.searchParams.get('upstream');
+      if (!manualUrl) {
+        responseStatus = 400;
+        return new NextResponse('Missing "upstream" parameter', { status: 400 });
+      }
+      try {
+        new URL(manualUrl); // Validate URL syntax
+        upstreamEndpoint = manualUrl;
+      } catch {
+        responseStatus = 400;
+        return new NextResponse('Invalid upstream URL', { status: 400 });
+      }
+    }
+
     // 3. Prepare Upstream Request
+    const upstreamUrl = new URL(upstreamEndpoint);
     
-    // For GET requests, forward all search parameters (dns=...)
+    // Pass through query params for GET, excluding internal ones
     if (request.method === 'GET') {
-      request.nextUrl.searchParams.forEach((value, key) => {
-        // Skip 'upstream' param for manual provider
-        if (key === 'upstream' && providerId === 'manual') return;
-        url.searchParams.append(key, value);
+      url.searchParams.forEach((value, key) => {
+        if (key !== 'upstream') { // Don't pass 'upstream' param to the DNS server
+           upstreamUrl.searchParams.append(key, value);
+        }
       });
     }
 
+    // Consistency Headers
     const headers = new Headers();
+    // Force JSON Accept as requested, unless strictly binary? 
+    // User requirement: "Explicit Accept: application/dns-json"
+    headers.set('Accept', 'application/dns-json'); 
+    headers.set('User-Agent', 'Secure-DoH-Proxy/1.0');
     
-    // Handle 'Accept' header: Prefer application/dns-message but support dns-json for testing
-    const clientAccept = request.headers.get('accept');
-    if (clientAccept && clientAccept.includes('application/dns-json')) {
-      headers.set('Accept', 'application/dns-json');
-    } else {
-      headers.set('Accept', 'application/dns-message');
-    }
-    
-    // Forward 'Content-Type' for POST requests (usually application/dns-message)
+    // Forward Content-Type if present (e.g. for POST dns-message)
     const contentType = request.headers.get('content-type');
     if (contentType) {
       headers.set('Content-Type', contentType);
     }
 
-    // 4. Fetch from Upstream
-    const upstreamResponse = await fetch(url.toString(), {
-      method: request.method,
-      headers: headers,
-      body: request.method === 'POST' ? request.body : undefined,
-      // @ts-expect-error - 'duplex' property is required for streaming bodies in current Node/Edge runtimes
-      duplex: 'half', 
-    });
+    // 4. Fetch with Timeout
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
 
-    // 5. Prepare Response
-    const responseHeaders = new Headers();
-    responseHeaders.set('Access-Control-Allow-Origin', '*'); // Enable CORS for web clients
-    
-    // Forward standard caching and content headers
-    const allowedHeaders = ['content-type', 'cache-control', 'expires', 'last-modified', 'vary'];
-    allowedHeaders.forEach(h => {
-      const val = upstreamResponse.headers.get(h);
-      if (val) responseHeaders.set(h, val);
-    });
+    try {
+      const upstreamResponse = await fetch(upstreamUrl.toString(), {
+        method: request.method,
+        headers: headers,
+        body: request.method === 'POST' ? request.body : undefined,
+        signal: controller.signal,
+        // @ts-expect-error - 'duplex' is needed for Node/Edge streaming
+        duplex: 'half', 
+      });
+      
+      clearTimeout(timeoutId);
+      responseStatus = upstreamResponse.status;
 
-    return new NextResponse(upstreamResponse.body, {
-      status: upstreamResponse.status,
-      statusText: upstreamResponse.statusText,
-      headers: responseHeaders,
-    });
+      // 5. Secure Response Construction
+      const responseHeaders = new Headers();
+      
+      // Strict Cache Control (User Req #1)
+      responseHeaders.set('Cache-Control', 'no-store, max-age=0');
+      responseHeaders.set('Pragma', 'no-cache');
+      responseHeaders.set('Expires', '0');
+      responseHeaders.set('Vary', 'Accept, Accept-Encoding');
+      
+      // CORS
+      responseHeaders.set('Access-Control-Allow-Origin', '*');
 
-  } catch (error) {
-    console.error(`DoH Proxy Error [${providerId}]:`, error);
-    return NextResponse.json(
-      { error: 'Internal Server Error', details: error instanceof Error ? error.message : String(error) }, 
-      { status: 500 }
-    );
+      // Forward content type
+      const respContentType = upstreamResponse.headers.get('content-type');
+      if (respContentType) {
+        responseHeaders.set('Content-Type', respContentType);
+      }
+
+      return new NextResponse(upstreamResponse.body, {
+        status: upstreamResponse.status,
+        statusText: upstreamResponse.statusText,
+        headers: responseHeaders,
+      });
+
+    } catch (fetchError: unknown) {
+      clearTimeout(timeoutId);
+      const isTimeout = (fetchError as Error).name === 'AbortError';
+      responseStatus = isTimeout ? 504 : 502;
+      
+      return new NextResponse(
+        JSON.stringify({ error: isTimeout ? 'Upstream Timeout' : 'Upstream Connection Failed' }),
+        { 
+          status: responseStatus,
+          headers: { 'Content-Type': 'application/json' }
+        }
+      );
+    }
+
+  } catch (err) {
+    console.error('Internal Error:', err);
+    responseStatus = 500;
+    return new NextResponse('Internal Server Error', { status: 500 });
+  } finally {
+    // 6. Logging (User Req #6)
+    logRequest({
+      timestamp: new Date().toISOString(),
+      clientIp: getClientIP(request),
+      provider: providerId,
+      durationMs: Date.now() - startTime,
+      status: responseStatus,
+      upstreamUrl: upstreamEndpoint, // Log the resolved endpoint
+      method: request.method
+    });
   }
 }
 
