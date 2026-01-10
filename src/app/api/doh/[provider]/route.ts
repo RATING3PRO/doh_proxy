@@ -107,7 +107,7 @@ async function handleDoH(request: NextRequest, providerId: string) {
     const upstreamUrl = new URL(upstreamEndpoint);
     
     // Pass through query params for GET, excluding internal ones
-    if (request.method === 'GET') {
+    if (request.method === 'GET' || request.method === 'HEAD') {
       url.searchParams.forEach((value, key) => {
         if (key !== 'upstream') { // Don't pass 'upstream' param to the DNS server
            upstreamUrl.searchParams.append(key, value);
@@ -133,6 +133,25 @@ async function handleDoH(request: NextRequest, providerId: string) {
     const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
 
     try {
+      // Handle HEAD method separately to return health status without fetching upstream body
+      // But user requested to return health status directly for HEAD requests
+      if (request.method === 'HEAD') {
+         clearTimeout(timeoutId);
+         responseStatus = 204;
+         const responseHeaders = new Headers();
+         // Strict Cache Control
+         responseHeaders.set('Cache-Control', 'no-store, max-age=0');
+         responseHeaders.set('Pragma', 'no-cache');
+         responseHeaders.set('Expires', '0');
+         responseHeaders.set('Vary', 'Accept, Accept-Encoding');
+         responseHeaders.set('Access-Control-Allow-Origin', '*');
+         
+         return new NextResponse(null, {
+            status: 204,
+            headers: responseHeaders,
+         });
+      }
+
       const upstreamResponse = await fetch(upstreamUrl.toString(), {
         method: request.method,
         headers: headers,
@@ -210,6 +229,14 @@ export async function GET(
 }
 
 export async function POST(
+  request: NextRequest,
+  { params }: { params: Promise<{ provider: string }> }
+) {
+  const { provider } = await params;
+  return handleDoH(request, provider);
+}
+
+export async function HEAD(
   request: NextRequest,
   { params }: { params: Promise<{ provider: string }> }
 ) {
