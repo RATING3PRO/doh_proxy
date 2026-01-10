@@ -2,11 +2,9 @@
 
 A privacy-focused, multi-upstream DNS over HTTPS (DoH) proxy built with **Next.js 16**.
 
->  **Security Update**: This branch (`CVE-FIX`) has been upgraded to **Next.js 16** to address **CVE-2025-66478**.
-
 ## Features
 
--  **Secure & Up-to-Date**: Patched against recent vulnerabilities (CVE-2025-66478).
+-  **Secure & Up-to-Date**: Built with the latest Next.js 16 (CVE-2025-66478 Patched).
 -  **Multi-Upstream**: Support for Cloudflare, Google, AliDNS, DNSPod, and Custom upstream.
 -  **DNS Tester**: Built-in beautiful UI to test DNS resolution across different providers.
 -  **Privacy First**: No logs, stateless proxying.
@@ -43,6 +41,7 @@ npm start
 ### Option 3: Other Platforms
 
 Since this is a standard Next.js 16 application, it can be deployed on various platforms:
+- Cloudflare Pages
 - AWS Amplify
 - Google Cloud Run
 - Azure Static Web Apps
