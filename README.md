@@ -1,46 +1,53 @@
-# Secure DoH Proxy for Cloudflare Pages
+# Secure DoH Proxy
 
-A privacy-focused, multi-upstream DNS over HTTPS (DoH) proxy built with Next.js App Router and deployed on Cloudflare Pages.
+A privacy-focused, multi-upstream DNS over HTTPS (DoH) proxy built with **Next.js 16**.
 
 ## Features
 
--  **Edge Powered**: Runs on Cloudflare's global network for sub-millisecond latency.
+-  **Secure & Up-to-Date**: Built with the latest Next.js 16 (CVE-2025-66478 Patched).
 -  **Multi-Upstream**: Support for Cloudflare, Google, AliDNS, DNSPod, and Custom upstream.
 -  **DNS Tester**: Built-in beautiful UI to test DNS resolution across different providers.
 -  **Privacy First**: No logs, stateless proxying.
 -  **Modern UI**: Built with Tailwind CSS and Lucide Icons.
 
-## Deploy to Cloudflare Pages
+## Deployment
 
-### Option 1: One-Click Deploy (Git)
+### Option 1: Vercel (Recommended)
 
-1. Fork this repository.
-2. Go to Cloudflare Dashboard > Pages > Create a project > Connect to Git.
-3. Select your repository.
-4. Configure the build settings:
-   - **Framework Preset**: `Next.js`
-   - **Build Command**: `npx @cloudflare/next-on-pages@1`
-   - **Build Output Directory**: `.vercel/output/static`
-   - **Node.js Version**: `20.x` or higher.
-5. (Important) Ensure **Compatibility flags** includes `nodejs_compat`. 
-   > The project includes a `wrangler.toml` which should automatically configure this, but if deployment fails, check **Settings** > **Build & deployments** > **Compatibility flags** in Cloudflare Dashboard.
+The easiest way to deploy this Next.js app is to use the [Vercel Platform](https://vercel.com/new).
 
-### Option 2: CLI Deploy
+1. Push this code to a Git repository (GitHub, GitLab, Bitbucket).
+2. Import the project into Vercel.
+3. Vercel will automatically detect Next.js and configure the build settings.
+4. (Optional) Add environment variables like `CUSTOM_DOH_URL` in the Vercel dashboard.
 
-1. Install dependencies:
-   ```bash
-   npm install
-   ```
+### Option 2: Docker / Self-Hosted
 
-2. Build the project:
-   ```bash
-   npm run pages:build
-   ```
+You can deploy this on any server that supports Node.js or Docker.
 
-3. Deploy using Wrangler:
-   ```bash
-   npx wrangler pages deploy .vercel/output/static --project-name=my-doh-proxy
-   ```
+**Build & Run with Node.js:**
+
+```bash
+# Install dependencies
+npm install
+
+# Build the project
+npm run build
+
+# Start the production server
+npm start
+```
+
+### Option 3: Other Platforms
+
+Since this is a standard Next.js 16 application, it can be deployed on various platforms:
+- Cloudflare Pages
+- AWS Amplify
+- Google Cloud Run
+- Azure Static Web Apps
+- Netlify
+- TencentCloud Edgeone Functions
+- AlibabaCloud ESA Function
 
 ## Configuration
 
@@ -53,17 +60,17 @@ A privacy-focused, multi-upstream DNS over HTTPS (DoH) proxy built with Next.js 
 ## Usage
 
 ### Web Interface
-Visit your deployed URL (e.g., `https://my-doh-proxy.pages.dev`) to use the visual DNS tester.
+Visit your deployed URL (e.g., `https://your-domain.com`) to use the visual DNS tester.
 
 ### API Endpoints
 Configure your DoH client (browser, router, or OS) with the following endpoints:
 
-- **Cloudflare**: `https://<your-domain>/api/doh/cloudflare`
-- **Google**: `https://<your-domain>/api/doh/google`
-- **AliDNS**: `https://<your-domain>/api/doh/alidns`
-- **DNSPod**: `https://<your-domain>/api/doh/dnspod`
-- **Custom**: `https://<your-domain>/api/doh/custom` (Requires `CUSTOM_DOH_URL`)
-- **Manual**: `https://<your-domain>/api/doh/manual?upstream=<url>`
+- **Cloudflare**: `/api/doh/cloudflare`
+- **Google**: `/api/doh/google`
+- **AliDNS**: `/api/doh/alidns`
+- **DNSPod**: `/api/doh/dnspod`
+- **Custom**: `/api/doh/custom` (Requires `CUSTOM_DOH_URL`)
+- **Manual**: `/api/doh/manual?upstream=<url>`
 
 ## Development
 
