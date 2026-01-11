@@ -19,7 +19,7 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
 # 禁用 Next.js 遥测
-ENV NEXT_TELEMETRY_DISABLED 1
+ENV NEXT_TELEMETRY_DISABLED=1
 
 # 构建应用
 RUN npm run build
@@ -28,24 +28,25 @@ RUN npm run build
 FROM base AS runner
 WORKDIR /app
 
-ENV NODE_ENV production
-ENV NEXT_TELEMETRY_DISABLED 1
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
 
 # 创建非 root 用户
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
 # 复制构建产物
-COPY --from=builder /app/public ./public
-
 # 自动利用 standalone 输出以减小镜像体积
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
+# 如果有 public 目录，取消注释下一行
+# COPY --from=builder /app/public ./public
+
 USER nextjs
 
 # 暴露端口（默认 8367）
-ENV PORT 8367
+ENV PORT=8367
 EXPOSE 8367
 
 # 启动命令
