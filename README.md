@@ -31,7 +31,7 @@ A privacy-focused, multi-upstream DNS over HTTPS (DoH) proxy built with **Next.j
 
 The easiest way to deploy this Next.js app is to use the [Vercel Platform](https://vercel.com/new).
 
-1. Push this code to a Git repository (GitHub, GitLab, Bitbucket).
+1. Fork this repository to your own GitHub account.
 2. Import the project into Vercel.
 3. Vercel will automatically detect Next.js and configure the build settings.
 4. (Optional) Add environment variables like `CUSTOM_DOH_URL` in the Vercel dashboard.
