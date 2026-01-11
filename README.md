@@ -38,7 +38,26 @@ The easiest way to deploy this Next.js app is to use the [Vercel Platform](https
 
 ### Option 2: Docker / Self-Hosted
 
-You can deploy this on any server that supports Node.js or Docker.
+You can deploy this on any server that supports Docker or Node.js.
+
+**Run with Docker (Recommended):**
+
+This project includes a production-ready `Dockerfile` and automated GitHub Actions workflow that publishes images to GitHub Container Registry (GHCR).
+
+```bash
+docker run -d \
+  -p 8367:8367 \
+  -e PORT=8367 \
+  -e CUSTOM_DOH_URL=https://1.1.1.1/dns-query \
+  --name doh-proxy \
+  ghcr.io/rating3pro/doh_proxy:latest
+```
+
+| Environment Variable | Description | Default |
+| -------------------- | ----------- | ------- |
+| `PORT`               | The port the application listens on. | `8367` |
+| `CUSTOM_DOH_URL`     | Upstream URL for 'Custom' provider. | - |
+| `DEBUG_LOG`          | Enable verbose logging. | `false` |
 
 **Build & Run with Node.js:**
 
