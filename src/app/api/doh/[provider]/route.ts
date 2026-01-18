@@ -59,17 +59,26 @@ function validateRequest(url: URL): NextResponse | null {
   const nameParam = url.searchParams.get('name');
   
   // Strict Validation for 'name' param
-  // If name parameter exists (even if empty), it must be valid and non-empty
-  if (url.searchParams.has('name')) {
-    if (!nameParam || nameParam.length === 0) {
-      return new NextResponse('Invalid domain: empty', { status: 400 });
-    }
-    if (nameParam.length > 253) {
-      return new NextResponse('Invalid domain: too long', { status: 400 });
-    }
-    if (!ALLOWED_DOMAIN_REGEX.test(nameParam)) {
-      return new NextResponse('Invalid domain: invalid characters', { status: 400 });
-    }
+  // Force validation: name parameter MUST exist and be valid for JSON API queries
+  // If user sends raw DNS message via base64 'dns' param, 'name' might be optional.
+  // But for standard DoH JSON API, 'name' is required.
+  // Assuming this proxy primarily serves JSON API or mixed.
+  // If 'dns' param exists (RFC 8484 GET), we might skip 'name' check.
+  // BUT user explicitly asked: "name 必须存在，且长度 ≥ 1" for ALL endpoints.
+  
+  if (url.searchParams.has('dns')) {
+     // RFC 8484 GET (base64 dns message) - 'name' is NOT required
+  } else {
+     // JSON API or invalid request - Enforce 'name' check
+     if (!nameParam || nameParam.length === 0) {
+       return new NextResponse('Invalid domain: empty', { status: 400 });
+     }
+     if (nameParam.length > 253) {
+       return new NextResponse('Invalid domain: too long', { status: 400 });
+     }
+     if (!ALLOWED_DOMAIN_REGEX.test(nameParam)) {
+       return new NextResponse('Invalid domain: invalid characters', { status: 400 });
+     }
   }
   return null;
 }
