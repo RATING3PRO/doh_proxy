@@ -189,6 +189,7 @@ async function handleDoH(request: NextRequest, providerId: string) {
       responseHeaders.set('Pragma', 'no-cache');
       responseHeaders.set('Expires', '0');
       responseHeaders.set('Vary', 'Accept, Accept-Encoding');
+      responseHeaders.set('X-DoH-Proxy-Version', 'v1.1.0');
       
       // CORS
       responseHeaders.set('Access-Control-Allow-Origin', '*');
