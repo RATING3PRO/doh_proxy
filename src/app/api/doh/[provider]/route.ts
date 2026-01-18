@@ -245,8 +245,7 @@ export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ provider: string }> }
 ) {
-  const { provider } = await params;
-  return handleDoH(request, provider);
+  return new NextResponse("Unsupported Media Type", { status: 415 });
 }
 
 export async function HEAD(
