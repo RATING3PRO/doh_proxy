@@ -50,7 +50,7 @@ docker run -d \
   -e PORT=8367 \
   -e CUSTOM_DOH_URL=https://1.1.1.1/dns-query \
   --name doh-proxy \
-  ghcr.io/rating3pro/doh_proxy:latest
+  ghcr.io/rating3pro/doh_proxy:main
 ```
 
 | Environment Variable | Description | Default |
