@@ -89,6 +89,22 @@ async function handleDoH(request: NextRequest, providerId: string) {
   let responseStatus = 500;
   
   try {
+    // 0. Handle HEAD requests immediately (Health Check)
+    if (request.method === 'HEAD') {
+      responseStatus = 200;
+      const responseHeaders = new Headers();
+      responseHeaders.set('Cache-Control', 'no-store, max-age=0');
+      responseHeaders.set('Pragma', 'no-cache');
+      responseHeaders.set('Expires', '0');
+      responseHeaders.set('Vary', 'Accept, Accept-Encoding');
+      responseHeaders.set('Access-Control-Allow-Origin', '*');
+
+      return new NextResponse(null, {
+        status: 200,
+        headers: responseHeaders,
+      });
+    }
+
     // 1. Input Validation
     const url = new URL(request.url);
     const validationError = validateRequest(url);
@@ -133,7 +149,7 @@ async function handleDoH(request: NextRequest, providerId: string) {
     const upstreamUrl = new URL(upstreamEndpoint);
     
     // Pass through query params for GET, excluding internal ones
-    if (request.method === 'GET' || request.method === 'HEAD') {
+    if (request.method === 'GET') {
       url.searchParams.forEach((value, key) => {
         if (key !== 'upstream') { // Don't pass 'upstream' param to the DNS server
            upstreamUrl.searchParams.append(key, value);
@@ -159,25 +175,6 @@ async function handleDoH(request: NextRequest, providerId: string) {
     const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
 
     try {
-      // Handle HEAD method separately to return health status without fetching upstream body
-      // But user requested to return health status directly for HEAD requests
-      if (request.method === 'HEAD') {
-         clearTimeout(timeoutId);
-         responseStatus = 204;
-         const responseHeaders = new Headers();
-         // Strict Cache Control
-         responseHeaders.set('Cache-Control', 'no-store, max-age=0');
-         responseHeaders.set('Pragma', 'no-cache');
-         responseHeaders.set('Expires', '0');
-         responseHeaders.set('Vary', 'Accept, Accept-Encoding');
-         responseHeaders.set('Access-Control-Allow-Origin', '*');
-         
-         return new NextResponse(null, {
-            status: 204,
-            headers: responseHeaders,
-         });
-      }
-
       const upstreamResponse = await fetch(upstreamUrl.toString(), {
         method: request.method,
         headers: headers,
