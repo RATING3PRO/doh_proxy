@@ -10,7 +10,7 @@ export const DOH_PROVIDERS: DoHProvider[] = [
     id: 'cloudflare',
     name: 'Cloudflare',
     endpoint: 'https://cloudflare-dns.com/dns-query',
-    description: 'Privacy-first, fast DNS resolver (1.1.1.1)',
+    description: 'Cloudflare Public DNS (1.1.1.1)',
   },
   {
     id: 'google',
