@@ -1,5 +1,7 @@
 # Secure DoH Proxy
 
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/RATING3PRO/doh_proxy)
+
 A privacy-focused, multi-upstream DNS over HTTPS (DoH) proxy built with **Next.js 16**.
 
 ## Features
