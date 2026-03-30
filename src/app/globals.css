@@ -1,17 +1,9 @@
 @import "tailwindcss";
 
-@theme {
-  --color-slate-50: #f8fafc;
-  --color-slate-100: #f1f5f9;
-  --color-slate-200: #e2e8f0;
-  --color-slate-500: #64748b;
-  --color-slate-600: #475569;
-  --color-slate-800: #1e293b;
-  --color-slate-900: #0f172a;
-}
-
 body {
-  @apply bg-slate-50 text-slate-900;
-  background: radial-gradient(circle at top left, #e0f2fe, #f0f9ff, #fff);
+  @apply bg-zinc-50 text-zinc-900;
   min-height: 100vh;
+  /* subtle dot pattern for a modern look */
+  background-image: radial-gradient(#e5e7eb 1px, transparent 1px);
+  background-size: 24px 24px;
 }
