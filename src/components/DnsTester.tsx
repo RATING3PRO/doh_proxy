@@ -88,7 +88,7 @@ export default function DnsTester() {
               type="text"
               value={domain}
               onChange={(e) => setDomain(e.target.value)}
-              className="w-full px-4 py-2.5 rounded-xl border border-zinc-200 focus:ring-2 focus:ring-zinc-900 focus:border-transparent outline-none transition-all bg-white/50"
+              className="w-full px-4 py-2.5 rounded-xl border border-white/50 focus:ring-2 focus:ring-zinc-400 focus:border-transparent outline-none transition-all bg-white/40 backdrop-blur-sm shadow-sm"
               placeholder="example.com"
               required
             />
@@ -99,7 +99,7 @@ export default function DnsTester() {
             <select
               value={type}
               onChange={(e) => setType(e.target.value)}
-              className="w-full px-4 py-2.5 rounded-xl border border-zinc-200 focus:ring-2 focus:ring-zinc-900 focus:border-transparent outline-none transition-all bg-white/50"
+              className="w-full px-4 py-2.5 rounded-xl border border-white/50 focus:ring-2 focus:ring-zinc-400 focus:border-transparent outline-none transition-all bg-white/40 backdrop-blur-sm shadow-sm"
             >
               {recordTypes.map((t) => (
                 <option key={t} value={t}>{t}</option>
@@ -117,10 +117,10 @@ export default function DnsTester() {
                 type="button"
                 onClick={() => setProviderId(p.id)}
                 className={clsx(
-                  "px-4 py-2 rounded-full text-sm font-medium transition-all border",
+                  "px-4 py-2 rounded-full text-sm font-medium transition-all border backdrop-blur-md",
                   providerId === p.id
-                    ? "bg-zinc-900 text-white border-zinc-900 shadow-sm"
-                    : "bg-white/50 text-zinc-500 border-zinc-200 hover:border-zinc-300 hover:text-zinc-800"
+                    ? "bg-zinc-900/80 text-white border-zinc-700/50 shadow-md"
+                    : "bg-white/40 text-zinc-600 border-white/50 hover:bg-white/60 hover:text-zinc-900 shadow-sm"
                 )}
               >
                 {p.name}
@@ -136,7 +136,7 @@ export default function DnsTester() {
               type="url"
               value={manualUrl}
               onChange={(e) => setManualUrl(e.target.value)}
-              className="w-full px-4 py-2.5 rounded-xl border border-zinc-200 focus:ring-2 focus:ring-zinc-900 focus:border-transparent outline-none transition-all bg-white/50"
+              className="w-full px-4 py-2.5 rounded-xl border border-white/50 focus:ring-2 focus:ring-zinc-400 focus:border-transparent outline-none transition-all bg-white/40 backdrop-blur-sm shadow-sm"
               placeholder="https://example.com/dns-query"
               required
             />
@@ -149,7 +149,7 @@ export default function DnsTester() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full py-3 mt-2 bg-zinc-900 text-white font-medium rounded-xl shadow-sm hover:bg-zinc-800 transition-all disabled:opacity-70 disabled:hover:bg-zinc-900 flex items-center justify-center space-x-2"
+          className="w-full py-3 mt-2 bg-zinc-900/80 backdrop-blur-md text-white font-medium rounded-xl shadow-md border border-zinc-700/50 hover:bg-zinc-800/90 transition-all disabled:opacity-70 disabled:hover:bg-zinc-900/80 flex items-center justify-center space-x-2"
         >
           {loading ? (
             <>

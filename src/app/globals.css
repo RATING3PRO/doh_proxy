@@ -1,9 +1,19 @@
 @import "tailwindcss";
 
 body {
-  @apply bg-zinc-50 text-zinc-900;
+  @apply bg-zinc-100 text-zinc-900 relative;
   min-height: 100vh;
-  /* subtle dot pattern for a modern look */
-  background-image: radial-gradient(#e5e7eb 1px, transparent 1px);
+}
+
+body::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  /* Darker dots */
+  background-image: radial-gradient(#9ca3af 1.5px, transparent 1.5px);
   background-size: 24px 24px;
+  /* Apply blur to the background dots */
+  filter: blur(1px);
+  opacity: 0.6;
 }
