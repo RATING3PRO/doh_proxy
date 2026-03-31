@@ -24,7 +24,7 @@ export default function Home() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto mb-24">
         <FeatureCard 
           title="Multi-Provider"
-          description="Switch between Cloudflare, Google, AliDNS, DNSPod, and custom endpoints instantly."
+          description="Switch between Cloudflare, Google, AdGuard, DNS.SB, and custom endpoints instantly."
         />
         <FeatureCard 
           title="Edge Powered"

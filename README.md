@@ -7,7 +7,7 @@ A privacy-focused, multi-upstream DNS over HTTPS (DoH) proxy built with **Next.j
 ## Features
 
 -  **Secure & Up-to-Date**: Built with the latest Next.js 16 (CVE-2025-66478 Patched).
--  **Multi-Upstream**: Support for Cloudflare, Google, AliDNS, DNSPod, and Custom upstream.
+-  **Multi-Upstream**: Support for Cloudflare, Google, AdGuard, DNS.SB, and Custom upstream.
 -  **DNS Tester**: Built-in beautiful UI to test DNS resolution across different providers.
 -  **Privacy First**: No logs, stateless proxying.
 -  **Modern UI**: Built with Tailwind CSS and Lucide Icons.
@@ -104,8 +104,8 @@ Configure your DoH client (browser, router, or OS) with the following endpoints:
 
 - **Cloudflare**: `/api/doh/cloudflare`
 - **Google**: `/api/doh/google`
-- **AliDNS**: `/api/doh/alidns`
-- **DNSPod**: `/api/doh/dnspod`
+- **AdGuard**: `/api/doh/adguard`
+- **DNS.SB**: `/api/doh/dnssb`
 - **Custom**: `/api/doh/custom` (Requires `CUSTOM_DOH_URL`)
 - **Manual**: `/api/doh/manual?upstream=<url>`
 
