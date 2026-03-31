@@ -94,6 +94,33 @@ Since this is a standard Next.js 16 application, it can be deployed on various p
 | `CUSTOM_DOH_URL` | The upstream DoH URL for the 'Custom' provider (e.g., `https://1.1.1.1/dns-query`) | No (Only for Custom provider) |
 | `DEBUG_LOG` | Set to `true` to enable verbose JSON logging for all requests. | No |
 
+### How to Change or Add Upstream Providers
+
+You can manage your upstream DoH providers using two different approaches depending on your needs:
+
+#### Method 1: Using the `CUSTOM_DOH_URL` Environment Variable (No code changes required)
+If you only need to use a single custom upstream without modifying the code, you can use the built-in `custom` endpoint.
+Simply set the `CUSTOM_DOH_URL` environment variable when deploying or running the app:
+```bash
+CUSTOM_DOH_URL=https://doh.opendns.com/dns-query npm run dev
+```
+Then point your clients to: `/api/doh/custom`
+
+#### Method 2: Editing the Built-in Providers List
+If you want to add multiple providers or change the default list shown in the Web UI, you need to modify the source code.
+1. Open the file `src/lib/providers.ts`.
+2. Locate the `DOH_PROVIDERS` array.
+3. Add a new provider object or modify existing ones. For example, to add OpenDNS:
+```typescript
+  {
+    id: 'opendns', // This will be your endpoint path: /api/doh/opendns
+    name: 'OpenDNS',
+    endpoint: 'https://doh.opendns.com/dns-query',
+    description: 'OpenDNS Family Shield',
+  },
+```
+4. Save the file and rebuild the project (`npm run build`). The new provider will automatically appear in the Web UI and be available as an API endpoint.
+
 ## Usage
 
 ### Web Interface
