@@ -38,10 +38,6 @@ interface LogEntry {
 }
 
 function logRequest(entry: LogEntry) {
-  // Only log if debug enabled or it's an error? 
-  // User said "Debug info must be explicitly enabled". 
-  // "Minimum config: Duration, Success/Fail, Upstream Name, Status Code" - this implies basic logs might be always on or structured.
-  // I'll stick to console.log which is standard for edge runtimes, but wrapped.
   if (process.env.DEBUG_LOG === 'true' || entry.status >= 400) {
     console.log(JSON.stringify(entry));
   }
@@ -57,14 +53,6 @@ function validateRequest(url: URL): NextResponse | null {
 
   // Validate Domain Name (if present in 'name' param for JSON API)
   const nameParam = url.searchParams.get('name');
-  
-  // Strict Validation for 'name' param
-  // Force validation: name parameter MUST exist and be valid for JSON API queries
-  // If user sends raw DNS message via base64 'dns' param, 'name' might be optional.
-  // But for standard DoH JSON API, 'name' is required.
-  // Assuming this proxy primarily serves JSON API or mixed.
-  // If 'dns' param exists (RFC 8484 GET), we might skip 'name' check.
-  // BUT user explicitly asked: "name 必须存在，且长度 ≥ 1" for ALL endpoints.
   
   if (url.searchParams.has('dns')) {
      // RFC 8484 GET (base64 dns message) - 'name' is NOT required
