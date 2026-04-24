@@ -1,6 +1,7 @@
-#:schema node_modules/wrangler/config-schema.json
-name = "doh-proxy"
-compatibility_date = "2026-01-02"
-compatibility_flags = ["nodejs_compat"]
-pages_build_output_dir = ".vercel/output/static"
-#keep_vars = true
+name = "doh-worker"
+main = "src/index.ts"
+compatibility_date = "2024-01-02"
+
+# [vars]
+# CUSTOM_DOH_URL = "https://1.1.1.1/dns-query"
+# DEBUG_LOG = "true"
