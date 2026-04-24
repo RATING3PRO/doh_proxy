@@ -5,3 +5,8 @@ compatibility_date = "2026-01-02"
 # [vars]
 # CUSTOM_DOH_URL = "https://1.1.1.1/dns-query"
 # DEBUG_LOG = "true"
+
+[observability]
+[observability.logs]
+enabled = false
+invocation_logs = true
