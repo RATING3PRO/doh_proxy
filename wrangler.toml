@@ -1,6 +1,6 @@
-name = "doh-worker"
+name = "doh-proxy-worker"
 main = "src/index.ts"
-compatibility_date = "2024-01-02"
+compatibility_date = "2026-01-02"
 
 # [vars]
 # CUSTOM_DOH_URL = "https://1.1.1.1/dns-query"
